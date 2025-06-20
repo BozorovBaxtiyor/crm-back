@@ -1,14 +1,33 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import 'reflect-metadata';
+
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.enableCors({
-    origin: '*',
-    methods: '*',
-    allowedHeaders: '*',
-  })
-  await app.listen(process.env.PORT ?? 3000);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+    const config = new DocumentBuilder()
+        .setTitle('CRM tizimi')
+        .setDescription(
+            'Crm system.',
+        )
+        .setVersion('1.0')
+        .addBearerAuth()
+        .addTag('API')
+        .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+
+    app.enableCors({
+        origin: '*',
+        methods: '*',
+        allowedHeaders: '*',
+    });
+  await app.listen(process.env.PORT ?? 3000, () => {
+      console.log(`Server is running on \nhttp://${process.env.HOST||'localhost'}:${process.env.PORT || 3000}/api`);
+      
+    });
 }
 bootstrap();

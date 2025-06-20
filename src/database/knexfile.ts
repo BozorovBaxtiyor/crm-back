@@ -1,6 +1,4 @@
-// knexfile.ts
 import * as dotenv from 'dotenv';
-import e from 'express';
 import type { Knex } from 'knex';
 import * as path from 'path';
 
@@ -13,13 +11,13 @@ interface ExtendedConnectionOptions extends Knex.PgConnectionConfig {
     };
 }
 
-const knexConfig: { [key: string]: Knex.Config } = {
-    development: { 
-        debug:true,
+const config: { [key: string]: Knex.Config } = {
+    development: {
+        debug: true,
         client: 'pg',
         connection: {
             host: process.env.DB_HOST,
-            port: parseInt(process.env.DB_PORT || '25060', 10),
+            port: parseInt(process.env.DB_PORT || '5432', 10),
             user: process.env.DB_USER,
             password: String(process.env.DB_PASSWORD),
             database: process.env.DB_NAME,
@@ -33,12 +31,12 @@ const knexConfig: { [key: string]: Knex.Config } = {
             max: 10,
         },
         migrations: {
-            directory: path.resolve(process.cwd(), '../database/migrations/v1'),
+            directory: path.join(__dirname, './migrations/v1'),
             extension: 'ts',
             tableName: 'knex_migrations',
         },
         seeds: {
-            directory: path.resolve(process.cwd(), '../database/seeds/v1'),
+            directory: path.join(__dirname, './seeds'),
             extension: 'ts',
         },
     },
@@ -46,7 +44,7 @@ const knexConfig: { [key: string]: Knex.Config } = {
         client: 'pg',
         connection: {
             host: process.env.DB_HOST,
-            port: parseInt(process.env.DB_PORT || '25060', 10),
+            port: parseInt(process.env.DB_PORT || '5432', 10),
             user: process.env.DB_USER,
             password: String(process.env.DB_PASSWORD),
             database: process.env.DB_NAME,
@@ -60,15 +58,16 @@ const knexConfig: { [key: string]: Knex.Config } = {
             max: 10,
         },
         migrations: {
-            directory: path.resolve(process.cwd(), '../database/migrations/v1'),
+            directory: path.join(__dirname, './migrations/v1'),
             extension: 'js',
             tableName: 'knex_migrations',
         },
         seeds: {
-            directory: path.resolve(process.cwd(), '../database/seeds/v1'),
+            directory: path.join(__dirname, './seeds'),
             extension: 'js',
         },
     },
 };
 
-export default knexConfig;
+// Knex instance yaratmaslik - faqat config export qilish
+export default config;
