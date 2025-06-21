@@ -5,11 +5,11 @@ import { QuerySalesDto } from './dto/query-sales.dto';
 @Injectable()
 export class AnalyticsRepository {
     async getDashboardStats(userId: number) {
-        // Get total customers count
         const totalCustomersResult = await db('customers')
-            .where({ user_id: userId })
             .count('id as count')
             .first();
+        console.log(totalCustomersResult , 'totalCustomersResult');
+        
         const totalCustomers = totalCustomersResult?.count ?? 0;
 
         // Get monthly sales (completed deals in the current month)
@@ -18,37 +18,35 @@ export class AnalyticsRepository {
         const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
         const monthlySalesResult = await db('deals')
-            .where({ user_id: userId, status: 'completed' })
-            .whereBetween('created_at', [firstDayOfMonth, lastDayOfMonth])
+            .where({  status: 'completed' })
+            .where('created_at', '<=', lastDayOfMonth)
+            .where('created_at', '>=', firstDayOfMonth)
             .sum('value as sum')
             .first();
+
+        
         const monthlySales = monthlySalesResult?.sum ?? 0;
 
-        // Get active deals count
         const activeDeals = await db('deals')
-            .where({ user_id: userId })
             .whereIn('status', ['new', 'in_progress'])
             .count('id as count')
             .first();
-        const activeDealsCount = activeDeals?.count ?? 0;
+        
 
-        // Get customer counts by status
         const customersByStatus = await db('customers')
-            .where({ user_id: userId })
             .select('status')
             .count('id as count')
             .groupBy('status');
 
         // Calculate conversion rate (completed deals / total deals)
         const completedDealsResult = await db('deals')
-            .where({ user_id: userId, status: 'completed' })
+            .where({  status: 'completed' })
             .count('id as count')
             .first();
 
         const completedDeals = completedDealsResult?.count ?? 0;
 
         const totalDealsResult = await db('deals')
-            .where({ user_id: userId })
             .count('id as count')
             .first();
 
@@ -62,7 +60,7 @@ export class AnalyticsRepository {
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
         const salesTrend = await db('deals')
-            .where({ user_id: userId, status: 'completed' })
+            .where({  status: 'completed' })
             .where('created_at', '>=', sixMonthsAgo)
             .select(db.raw("to_char(created_at, 'YYYY-MM') as month"))
             .sum('value as sales')
@@ -83,7 +81,7 @@ export class AnalyticsRepository {
         return {
             totalCustomers: Number(totalCustomers) || 0,
             monthlySales: Number(monthlySales) || 0,
-            activeDeals: Number(activeDeals) || 0,
+            activeDeals: Number(activeDeals?.count) || 0,
             conversionRate: parseFloat(conversionRate.toFixed(2)) || 0,
             customersByStatus: customerStatusCounts,
             salesTrend: salesTrend.map(item => ({
@@ -122,7 +120,7 @@ export class AnalyticsRepository {
 
         // Get total sales in the selected period
         const  totalSales  = await db('deals')
-            .where({ user_id: userId, status: 'completed' })
+            .where({  status: 'completed' })
             .whereBetween('created_at', [start, end])
             .sum('value as sum')
             .first();
@@ -130,7 +128,7 @@ export class AnalyticsRepository {
 
         // Get sales by period
         const salesByPeriod = await db('deals')
-            .where({ user_id: userId, status: 'completed' })
+            .where({  status: 'completed' })
             .whereBetween('created_at', [start, end])
             .select(db.raw(`to_char(created_at, '${timeFormat}') as period`))
             .sum('value as sales')
@@ -140,8 +138,8 @@ export class AnalyticsRepository {
 
         // Get top customers by sales value
         const topCustomers = await db('deals')
-            .where({ user_id: userId, status: 'completed' })
-            .whereBetween('created_at', [start, end])
+            .where({  'deals.status': 'completed' })
+            .whereBetween('deals.created_at', [start, end])
             .join('customers', 'deals.customer_id', 'customers.id')
             .select('customers.id as customerId', 'customers.name as customerName')
             .sum('deals.value as totalValue')
