@@ -14,9 +14,11 @@ export class AuthService {
 
     async login(dto: LoginDto) {
         const user = await this.repo.findByEmail(dto.email);
-        if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+        
+        if (!user || !(await bcrypt.compare(dto.password, user.password_hash))) {
             throw new UnauthorizedException('Invalid credentials');
         }
+        
         const jwtSecret = this.configService.get<string>('JWT_SECRET');
         const jwtRefreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
 

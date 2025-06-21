@@ -36,7 +36,7 @@ const config: { [key: string]: Knex.Config } = {
             tableName: 'knex_migrations',
         },
         seeds: {
-            directory: path.join(__dirname, './seeds'),
+            directory: path.join(__dirname, './seeds/v1'),
             extension: 'ts',
         },
     },
@@ -63,7 +63,7 @@ const config: { [key: string]: Knex.Config } = {
             tableName: 'knex_migrations',
         },
         seeds: {
-            directory: path.join(__dirname, './seeds'),
+            directory: path.join(__dirname, './seeds/v1'),
             extension: 'js',
         },
     },
