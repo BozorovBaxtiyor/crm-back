@@ -10,9 +10,7 @@ async function bootstrap() {
 
     const config = new DocumentBuilder()
         .setTitle('CRM tizimi')
-        .setDescription(
-            'Crm system.',
-        )
+        .setDescription('Crm system.')
         .setVersion('1.0')
         .addBearerAuth()
         .addTag('API')
@@ -26,9 +24,11 @@ async function bootstrap() {
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
     });
-  await app.listen(process.env.PORT ?? 3000, () => {
-      console.log(`Server is running on \nhttp://${process.env.HOST||'localhost'}:${process.env.PORT || 3000}/api`);
-      
+    const port = process.env.PORT || 7001;
+    await app.listen(port, '0.0.0.0', () => {
+        console.log(
+            `Server is running on \nhttp://${process.env.HOST || 'localhost'}:${process.env.PORT || 3000}/api`,
+        );
     });
 }
 bootstrap();
