@@ -29,8 +29,6 @@ export class AuthController {
     @Post('refresh')
     @UseGuards(JwtRefreshGuard)
     async refresh(@Req() req: ICustomRequest) {
-        console.log(req.user);
-        
         return this.authService.refreshToken(req.user.id);
     }
 }

@@ -26,7 +26,9 @@ export class JwtRefreshGuard implements CanActivate {
 
         try {
             const payload = await this.jwtRefresh.verifyAsync<IJwtRefreshPayload>(token);
+
             request.user = payload as any;
+            
         } catch {
             throw new UnauthorizedException('Invalid token');
         }
