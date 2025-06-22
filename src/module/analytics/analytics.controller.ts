@@ -1,11 +1,17 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Role } from 'src/common/decorators/role.decorators';
+import { UserRole } from 'src/common/enums/roles.enum';
+import { JwtHttpAuthGuard } from 'src/common/guards/auth.guard';
+import { HttpRoleGuard } from 'src/common/guards/roles.guard';
 import { AnalyticsService } from './analytics.service';
 import { QuerySalesDto } from './dto/query-sales.dto';
 
 @Controller('analytics')
 @ApiTags('Analytics')
 @ApiBearerAuth()
+@UseGuards(JwtHttpAuthGuard, HttpRoleGuard)
+@Role(UserRole.ADMIN, UserRole.SUPERADMIN)
 export class AnalyticsController {
     constructor(private readonly analyticsService: AnalyticsService) {}
 

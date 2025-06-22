@@ -9,6 +9,7 @@ import {
     Put,
     Query,
     Request,
+    UseGuards,
 } from '@nestjs/common';
 import {
     ApiBearerAuth,
@@ -18,6 +19,10 @@ import {
     ApiResponse,
     ApiTags,
 } from '@nestjs/swagger';
+import { Role } from 'src/common/decorators/role.decorators';
+import { UserRole } from 'src/common/enums/roles.enum';
+import { JwtHttpAuthGuard } from 'src/common/guards/auth.guard';
+import { HttpRoleGuard } from 'src/common/guards/roles.guard';
 import { DealsService } from './deals.service';
 import { CreateDealDto } from './dto/create-deal.dto';
 import { QueryDealDto } from './dto/query-deal.dto';
@@ -26,6 +31,8 @@ import { UpdateDealDto } from './dto/update-deal.dto';
 @Controller('deals')
 @ApiTags('Deals')
 @ApiBearerAuth()
+@UseGuards(JwtHttpAuthGuard, HttpRoleGuard)
+@Role(UserRole.ADMIN, UserRole.SUPERADMIN)
 export class DealsController {
     constructor(private readonly dealsService: DealsService) {}
 
