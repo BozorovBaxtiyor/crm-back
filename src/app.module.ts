@@ -15,7 +15,8 @@ import { AnalyticsModule } from './module/analytics/analytics.module';
         CustomerModule,
         DealsModule,
         ActivitiesModule,
-        AnalyticsModule
+        AnalyticsModule,
+    
     ],
 })
 export class AppModule {}

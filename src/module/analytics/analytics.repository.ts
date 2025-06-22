@@ -4,12 +4,10 @@ import { QuerySalesDto } from './dto/query-sales.dto';
 
 @Injectable()
 export class AnalyticsRepository {
-    async getDashboardStats(userId: number) {
-        const totalCustomersResult = await db('customers')
-            .count('id as count')
-            .first();
-        console.log(totalCustomersResult , 'totalCustomersResult');
-        
+    async getDashboardStats() {
+        const totalCustomersResult = await db('customers').count('id as count').first();
+        console.log(totalCustomersResult, 'totalCustomersResult');
+
         const totalCustomers = totalCustomersResult?.count ?? 0;
 
         // Get monthly sales (completed deals in the current month)
@@ -18,20 +16,18 @@ export class AnalyticsRepository {
         const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
         const monthlySalesResult = await db('deals')
-            .where({  status: 'completed' })
+            .where({ status: 'completed' })
             .where('created_at', '<=', lastDayOfMonth)
             .where('created_at', '>=', firstDayOfMonth)
             .sum('value as sum')
             .first();
 
-        
         const monthlySales = monthlySalesResult?.sum ?? 0;
 
         const activeDeals = await db('deals')
             .whereIn('status', ['new', 'in_progress'])
             .count('id as count')
             .first();
-        
 
         const customersByStatus = await db('customers')
             .select('status')
@@ -40,15 +36,13 @@ export class AnalyticsRepository {
 
         // Calculate conversion rate (completed deals / total deals)
         const completedDealsResult = await db('deals')
-            .where({  status: 'completed' })
+            .where({ status: 'completed' })
             .count('id as count')
             .first();
 
         const completedDeals = completedDealsResult?.count ?? 0;
 
-        const totalDealsResult = await db('deals')
-            .count('id as count')
-            .first();
+        const totalDealsResult = await db('deals').count('id as count').first();
 
         const totalDeals = totalDealsResult?.count ?? 0;
 
@@ -60,7 +54,7 @@ export class AnalyticsRepository {
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
         const salesTrend = await db('deals')
-            .where({  status: 'completed' })
+            .where({ status: 'completed' })
             .where('created_at', '>=', sixMonthsAgo)
             .select(db.raw("to_char(created_at, 'YYYY-MM') as month"))
             .sum('value as sales')
@@ -91,7 +85,7 @@ export class AnalyticsRepository {
         };
     }
 
-    async getSalesAnalytics(query: QuerySalesDto, userId: number) {
+    async getSalesAnalytics(query: QuerySalesDto) {
         const { startDate, endDate, period } = query;
 
         // Set default date range if not provided
@@ -119,16 +113,15 @@ export class AnalyticsRepository {
         }
 
         // Get total sales in the selected period
-        const  totalSales  = await db('deals')
-            .where({  status: 'completed' })
+        const totalSales = await db('deals')
+            .where({ status: 'completed' })
             .whereBetween('created_at', [start, end])
             .sum('value as sum')
             .first();
-        
 
         // Get sales by period
         const salesByPeriod = await db('deals')
-            .where({  status: 'completed' })
+            .where({ status: 'completed' })
             .whereBetween('created_at', [start, end])
             .select(db.raw(`to_char(created_at, '${timeFormat}') as period`))
             .sum('value as sales')
@@ -138,7 +131,7 @@ export class AnalyticsRepository {
 
         // Get top customers by sales value
         const topCustomers = await db('deals')
-            .where({  'deals.status': 'completed' })
+            .where({ 'deals.status': 'completed' })
             .whereBetween('deals.created_at', [start, end])
             .join('customers', 'deals.customer_id', 'customers.id')
             .select('customers.id as customerId', 'customers.name as customerName')

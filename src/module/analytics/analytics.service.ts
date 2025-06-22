@@ -6,11 +6,11 @@ import { QuerySalesDto } from './dto/query-sales.dto';
 export class AnalyticsService {
     constructor(private readonly repository: AnalyticsRepository) {}
 
-    async getDashboardStats(userId: number) {
-        return this.repository.getDashboardStats(userId);
+    async getDashboardStats() {
+        return this.repository.getDashboardStats();
     }
 
-    async getSalesAnalytics(query: QuerySalesDto, userId: number) {
-        return this.repository.getSalesAnalytics(query, userId);
+    async getSalesAnalytics(query: QuerySalesDto) {
+        return this.repository.getSalesAnalytics(query);
     }
 }

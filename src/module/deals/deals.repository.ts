@@ -7,13 +7,12 @@ import { Deal } from './entity/deal.entity';
 
 @Injectable()
 export class DealsRepository {
-    async findAll(query: QueryDealDto, userId: number): Promise<[Deal[], number]> {
+    async findAll(query: QueryDealDto): Promise<[Deal[], number]> {
         const { page = 1, limit = 10, status, customerId } = query;
         const offset = (page - 1) * limit;
 
         // Build base query for deals
         const dealQuery = db('deals')
-            .where({ user_id: userId })
             .select(
                 'deals.id',
                 'deals.title',
@@ -47,7 +46,7 @@ export class DealsRepository {
             .offset(offset);
 
         // Build query to count total items
-        const countQuery = db('deals').where({ user_id: userId });
+        const countQuery = db('deals');
 
         if (status) {
             countQuery.andWhere('status', status);
@@ -81,9 +80,9 @@ export class DealsRepository {
         return [formattedDeals, Number(total?.count || 0)];
     }
 
-    async findById(id: number, userId: number): Promise<Deal | null> {
+    async findById(id: number): Promise<Deal | null> {
         const deal = await db('deals')
-            .where({ 'deals.id': id, 'deals.user_id': userId })
+            .where({ 'deals.id': id})
             .leftJoin('customers', 'deals.customer_id', 'customers.id')
             .select(
                 'deals.id',
@@ -114,7 +113,7 @@ export class DealsRepository {
         };
     }
 
-    async create(data: CreateDealDto, userId: number): Promise<Deal> {
+    async create(data: CreateDealDto): Promise<Deal> {
         const [dealId] = await db('deals')
             .insert({
                 title: data.title,
@@ -122,20 +121,20 @@ export class DealsRepository {
                 value: data.value,
                 status: data.status || 'new',
                 customer_id: data.customerId,
-                user_id: userId,
+                user_id: 100,
             })
             .returning('id');
 
-        const deal = await this.findById(dealId, userId);
+        const deal = await this.findById(dealId);
         if (!deal) {
             throw new Error('Failed to create deal: Deal not found after creation.');
         }
         return deal;
     }
 
-    async update(id: number, data: UpdateDealDto, userId: number): Promise<Deal | null> {
+    async update(id: number, data: UpdateDealDto): Promise<Deal | null> {
         const updateResult = await db('deals')
-            .where({ id, user_id: userId })
+            .where({ id })
             .update({
                 ...(data.title && { title: data.title }),
                 ...(data.description !== undefined && { description: data.description }),
@@ -147,11 +146,11 @@ export class DealsRepository {
 
         if (updateResult === 0) return null;
 
-        return this.findById(id, userId);
+        return this.findById(id);
     }
 
-    async delete(id: number, userId: number): Promise<boolean> {
-        const result = await db('deals').where({ id, user_id: userId }).delete();
+    async delete(id: number): Promise<boolean> {
+        const result = await db('deals').delete();
 
         return result > 0;
     }

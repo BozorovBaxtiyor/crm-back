@@ -7,8 +7,8 @@ import { QueryActivityDto } from './dto/query-activity.dto';
 export class ActivitiesService {
     constructor(private readonly repository: ActivitiesRepository) {}
 
-    async findAll(query: QueryActivityDto, userId: number) {
-        const [activities, total] = await this.repository.findAll(query, userId);
+    async findAll(query: QueryActivityDto) {
+        const [activities, total] = await this.repository.findAll(query);
         const totalPages = Math.ceil(total / (query.limit || 10));
 
         return {
@@ -22,8 +22,8 @@ export class ActivitiesService {
         };
     }
 
-    async create(dto: CreateActivityDto, userId: number) {
-        const activity = await this.repository.create(dto, userId);
+    async create(dto: CreateActivityDto) {
+        const activity = await this.repository.create(dto);
         return { activity };
     }
 }

@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CustomerRepository } from './customer.repository';
 import { CreateCustomerDto } from './dto/create-customer.dto';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { QueryCustomerDto } from './dto/query-customer.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Injectable()
 export class CustomerService {
     constructor(private readonly repository: CustomerRepository) {}
 
-    async findAll(query: QueryCustomerDto, userId: number) {
-        const [customers, total] = await this.repository.findAll(query, userId);
+    async findAll(query: QueryCustomerDto) {
+        const [customers, total] = await this.repository.findAll(query);
         const totalPages = Math.ceil(total / (query.limit || 10));
 
         return {
@@ -23,29 +23,29 @@ export class CustomerService {
         };
     }
 
-    async findById(id: number, userId: number) {
-        const customer = await this.repository.findById(id, userId);
+    async findById(id: number) {
+        const customer = await this.repository.findById(id);
         if (!customer) {
             throw new NotFoundException(`Customer with id ${id} not found`);
         }
         return { customer };
     }
 
-    async create(dto: CreateCustomerDto, userId: number) {
-        const customer = await this.repository.create(dto, userId);
+    async create(dto: CreateCustomerDto) {
+        const customer = await this.repository.create(dto);
         return { customer };
     }
 
-    async update(id: number, dto: UpdateCustomerDto, userId: number) {
-        const customer = await this.repository.update(id, dto, userId);
+    async update(id: number, dto: UpdateCustomerDto) {
+        const customer = await this.repository.update(id, dto);
         if (!customer) {
             throw new NotFoundException(`Customer with id ${id} not found`);
         }
         return { customer };
     }
 
-    async delete(id: number, userId: number) {
-        const deleted = await this.repository.delete(id, userId);
+    async delete(id: number) {
+        const deleted = await this.repository.delete(id);
         if (!deleted) {
             throw new NotFoundException(`Customer with id ${id} not found`);
         }

@@ -22,8 +22,9 @@ async function bootstrap() {
 
     app.enableCors({
         origin: '*',
-        methods: '*',
-        allowedHeaders: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
     });
   await app.listen(process.env.PORT ?? 3000, () => {
       console.log(`Server is running on \nhttp://${process.env.HOST||'localhost'}:${process.env.PORT || 3000}/api`);

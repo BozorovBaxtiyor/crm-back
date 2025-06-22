@@ -9,12 +9,12 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
-import { JWT_ACCESS } from '../constants/jwt.constants';
-import { ICustomRequest, IJwtPayload } from '../types/types';
+import { JWT_REFRESH } from '../constants/jwt.constants';
+import { ICustomRequest, IJwtRefreshPayload } from '../types/types';
 
 @Injectable()
-export class JwtHttpAuthGuard implements CanActivate {
-    constructor(@Inject(JWT_ACCESS) private readonly jwtAccess: JwtService) {}
+export class JwtRefreshGuard implements CanActivate {
+    constructor(@Inject(JWT_REFRESH) private readonly jwtRefresh: JwtService) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest<ICustomRequest>();
@@ -25,8 +25,8 @@ export class JwtHttpAuthGuard implements CanActivate {
         }
 
         try {
-            const payload = await this.jwtAccess.verifyAsync<IJwtPayload>(token);
-            request.user = payload;
+            const payload = await this.jwtRefresh.verifyAsync<IJwtRefreshPayload>(token);
+            request.user = payload as any;
         } catch {
             throw new UnauthorizedException('Invalid token');
         }

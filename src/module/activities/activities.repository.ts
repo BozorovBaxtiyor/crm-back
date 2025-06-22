@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import db from 'src/database/knexfile1';
-import { Activity } from './entity/activity.entity';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { QueryActivityDto } from './dto/query-activity.dto';
+import { Activity } from './entity/activity.entity';
 
 @Injectable()
 export class ActivitiesRepository {
-    async findAll(query: QueryActivityDto, userId: number): Promise<[Activity[], number]> {
+    async findAll(query: QueryActivityDto): Promise<[Activity[], number]> {
         const { page = 1, limit = 10, type, customerId } = query;
         const offset = (page - 1) * limit;
 
-        // Build base query for activities
         const activityQuery = db('activities')
-            .where({ user_id: userId })
             .select(
                 'activities.id',
                 'activities.type',
@@ -22,7 +20,6 @@ export class ActivitiesRepository {
             )
             .orderBy('activities.created_at', 'desc');
 
-        // Apply filters if provided
         if (type) {
             activityQuery.andWhere('activities.type', type);
         }
@@ -38,8 +35,7 @@ export class ActivitiesRepository {
             .limit(limit)
             .offset(offset);
 
-        // Build query to count total items
-        const countQuery = db('activities').where({ user_id: userId });
+        const countQuery = db('activities');
 
         if (type) {
             countQuery.andWhere('type', type);
@@ -69,19 +65,20 @@ export class ActivitiesRepository {
         return [formattedActivities, Number(total?.count || 0)];
     }
 
-    async create(data: CreateActivityDto, userId: number): Promise<Activity> {
+    async create(data: CreateActivityDto): Promise<Activity> {
         const [activityId] = await db('activities')
             .insert({
                 type: data.type,
                 description: data.description,
                 customer_id: data.customerId,
-                user_id: userId,
+                user_id: 100,
             })
             .returning('id');
 
-        // Fetch the created activity with customer information
+        console.log(data, 'data', activityId, 'activityId');
+
         const activity = await db('activities')
-            .where({ 'activities.id': activityId })
+            .where({ 'activities.id': activityId.id })
             .leftJoin('customers', 'activities.customer_id', 'customers.id')
             .select(
                 'activities.id',

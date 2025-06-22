@@ -8,8 +8,8 @@ import { UpdateDealDto } from './dto/update-deal.dto';
 export class DealsService {
     constructor(private readonly repository: DealsRepository) {}
 
-    async findAll(query: QueryDealDto, userId: number) {
-        const [deals, total] = await this.repository.findAll(query, userId);
+    async findAll(query: QueryDealDto) {
+        const [deals, total] = await this.repository.findAll(query);
         const totalPages = Math.ceil(total / (query.limit || 10));
 
         return {
@@ -22,29 +22,29 @@ export class DealsService {
         };
     }
 
-    async findById(id: number, userId: number) {
-        const deal = await this.repository.findById(id, userId);
+    async findById(id: number) {
+        const deal = await this.repository.findById(id);
         if (!deal) {
             throw new NotFoundException(`Deal with ID ${id} not found`);
         }
         return { deal };
     }
 
-    async create(dto: CreateDealDto, userId: number) {
-        const deal = await this.repository.create(dto, userId);
+    async create(dto: CreateDealDto) {
+        const deal = await this.repository.create(dto);
         return { deal };
     }
 
-    async update(id: number, dto: UpdateDealDto, userId: number) {
-        const deal = await this.repository.update(id, dto, userId);
+    async update(id: number, dto: UpdateDealDto) {
+        const deal = await this.repository.update(id, dto);
         if (!deal) {
             throw new NotFoundException(`Deal with ID ${id} not found`);
         }
         return { deal };
     }
 
-    async delete(id: number, userId: number) {
-        const deleted = await this.repository.delete(id, userId);
+    async delete(id: number) {
+        const deleted = await this.repository.delete(id);
         if (!deleted) {
             throw new NotFoundException(`Deal with ID ${id} not found`);
         }

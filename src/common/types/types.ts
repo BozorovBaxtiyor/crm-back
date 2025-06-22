@@ -2,9 +2,15 @@
 import { Request } from 'express';
 
 export interface IJwtPayload {
-    userId: number;
+    id: number;
+    email: string;
     role: string;
-    roleId: number;
+    iat: number;
+    exp: number;
+}
+
+export interface IJwtRefreshPayload {
+    id: number;
     iat: number;
     exp: number;
 }
@@ -20,15 +26,13 @@ export interface IJwtPayloadForAgent {
 }
 
 export interface ICustomRequest extends Request {
-    user?: IJwtPayload;
+    user: IJwtPayload;
 }
 
 export interface IUser {
     id?: number;
-    username?: string;
     email?: string;
-    password?: string;
-    fullName?: string;
+    password_hash: string;
     role?: string;
     roleId?: number;
     created_at?: Date;

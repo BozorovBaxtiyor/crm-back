@@ -7,12 +7,11 @@ import { Customer } from './entity/customer.entity';
 
 @Injectable()
 export class CustomerRepository {
-    async findAll(query: QueryCustomerDto, userId: number): Promise<[Customer[], number]> {
+    async findAll(query: QueryCustomerDto): Promise<[Customer[], number]> {
         const { page = 1, limit = 10, search, status } = query;
         const offset = (page - 1) * limit;
 
         const queryBuilder = db('customers')
-            .where({ user_id: userId })
             .select(
                 'id',
                 'name',
@@ -38,7 +37,7 @@ export class CustomerRepository {
             queryBuilder.andWhere({ status });
         }
 
-        const totalQuery = db('customers').where({ user_id: userId });
+        const totalQuery = db('customers');
 
         if (search) {
             totalQuery.andWhere(builder => {
@@ -63,9 +62,9 @@ export class CustomerRepository {
         return [customers, Number(total?.count || 0)];
     }
 
-    async findById(id: number, userId: number): Promise<Customer | null> {
+    async findById(id: number): Promise<Customer | null> {
         return db('customers')
-            .where({ id, user_id: userId })
+            .where({ id })
             .select(
                 'id',
                 'name',
@@ -80,7 +79,7 @@ export class CustomerRepository {
             .first();
     }
 
-    async create(data: CreateCustomerDto, userId: number): Promise<Customer> {
+    async create(data: CreateCustomerDto): Promise<Customer> {
         const [result] = await db('customers')
             .insert({
                 name: data.name,
@@ -89,7 +88,7 @@ export class CustomerRepository {
                 company: data.company || null,
                 status: data.status || 'potential',
                 value: data.value || null,
-                user_id: userId,
+                user_id: 104,
             })
             .returning([
                 'id',
@@ -106,9 +105,9 @@ export class CustomerRepository {
         return result;
     }
 
-    async update(id: number, data: UpdateCustomerDto, userId: number): Promise<Customer | null> {
+    async update(id: number, data: UpdateCustomerDto): Promise<Customer | null> {
         const [result] = await db('customers')
-            .where({ id, user_id: userId })
+            .where({ id: id })
             .update({
                 ...(data.name && { name: data.name }),
                 ...(data.email && { email: data.email }),
@@ -133,8 +132,8 @@ export class CustomerRepository {
         return result || null;
     }
 
-    async delete(id: number, userId: number): Promise<boolean> {
-        const result = await db('customers').where({ id, user_id: userId }).delete();
+    async delete(id: number): Promise<boolean> {
+        const result = await db('customers').where({ id:id}).delete();
 
         return result > 0;
     }
