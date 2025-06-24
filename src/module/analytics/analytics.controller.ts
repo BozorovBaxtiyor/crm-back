@@ -19,7 +19,6 @@ export class AnalyticsController {
     @ApiOperation({ summary: 'Get dashboard statistics' })
     async getDashboard() {
         const data = await this.analyticsService.getDashboardStats();
-        console.log('Dashboard data:', data);
         return { success: true, data };
     }
 
@@ -28,7 +27,6 @@ export class AnalyticsController {
     @ApiQuery({ type: QuerySalesDto })
     async getSalesAnalytics(@Query() query: QuerySalesDto) {
         const data = await this.analyticsService.getSalesAnalytics(query);
-        console.log('Sales analytics data:', data);
         return { success: true, data };
     }
 }

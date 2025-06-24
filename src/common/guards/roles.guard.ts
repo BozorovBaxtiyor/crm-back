@@ -8,9 +8,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { IJwtPayload } from '../types/types';
-import { UserRole } from '../enums/roles.enum';
 import { rolesKey } from '../decorators/role.decorators';
+import { UserRole } from '../enums/roles.enum';
+import { IJwtPayload } from '../types/types';
 
 @Injectable()
 export class HttpRoleGuard implements CanActivate {
@@ -22,11 +22,7 @@ export class HttpRoleGuard implements CanActivate {
             context.getClass(),
         ]);
 
-        console.log(requiredRole);
-        
         const { user }: { user: IJwtPayload } = context.switchToHttp().getRequest();
-        console.log(user);
-        
 
         if (!user?.role) {
             throw new HttpException(

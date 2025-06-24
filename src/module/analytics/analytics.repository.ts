@@ -6,8 +6,6 @@ import { QuerySalesDto } from './dto/query-sales.dto';
 export class AnalyticsRepository {
     async getDashboardStats() {
         const totalCustomersResult = await db('customers').count('id as count').first();
-        console.log(totalCustomersResult, 'totalCustomersResult');
-
         const totalCustomers = totalCustomersResult?.count ?? 0;
 
         // Get monthly sales (completed deals in the current month)

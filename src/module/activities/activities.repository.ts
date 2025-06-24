@@ -75,8 +75,6 @@ export class ActivitiesRepository {
             })
             .returning('id');
 
-        console.log(data, 'data', activityId, 'activityId');
-
         const activity = await db('activities')
             .where({ 'activities.id': activityId.id })
             .leftJoin('customers', 'activities.customer_id', 'customers.id')

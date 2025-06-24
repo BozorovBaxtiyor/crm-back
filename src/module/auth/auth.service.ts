@@ -54,7 +54,6 @@ export class AuthService {
 
     async refreshToken(id: number) {
         try {
-            console.log(id);
             
             const user = await this.repo.findById(id);
             if (!user) throw new NotFoundException('User not found');
@@ -72,8 +71,6 @@ export class AuthService {
                 },
             };
         } catch (error) {
-            console.log(error);
-
             throw new UnauthorizedException('Invalid refresh token');
         }
     }
