@@ -4,11 +4,12 @@ import { QuerySalesDto } from './dto/query-sales.dto';
 
 @Injectable()
 export class AnalyticsRepository {
-    async getDashboardStats() {
+    async getDashboardStats(period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'monthly') {
+        console.log(period , 'period');
+        
         const totalCustomersResult = await db('customers').count('id as count').first();
         const totalCustomers = totalCustomersResult?.count ?? 0;
 
-        // Get monthly sales (completed deals in the current month)
         const currentDate = new Date();
         const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
         const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -32,7 +33,6 @@ export class AnalyticsRepository {
             .count('id as count')
             .groupBy('status');
 
-        // Calculate conversion rate (completed deals / total deals)
         const completedDealsResult = await db('deals')
             .where({ status: 'completed' })
             .count('id as count')
@@ -41,25 +41,45 @@ export class AnalyticsRepository {
         const completedDeals = completedDealsResult?.count ?? 0;
 
         const totalDealsResult = await db('deals').count('id as count').first();
-
         const totalDeals = totalDealsResult?.count ?? 0;
 
         const conversionRate =
             Number(totalDeals) > 0 ? (Number(completedDeals) / Number(totalDeals)) * 100 : 0;
 
-        // Get sales trend for the last 6 months
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        let dateFormat: string;
+        let timeRange: Date;
+
+        switch (period) {
+            case 'daily':
+                dateFormat = 'YYYY-MM-DD';
+                timeRange = new Date();
+                timeRange.setDate(timeRange.getDate() - 30); // Last 30 days
+                break;
+            case 'weekly':
+                dateFormat = 'YYYY-WW';
+                timeRange = new Date();
+                timeRange.setMonth(timeRange.getMonth() - 6); // Last 6 months
+                break;
+            case 'yearly':
+                dateFormat = 'YYYY';
+                timeRange = new Date();
+                timeRange.setFullYear(timeRange.getFullYear() - 5); // Last 5 years
+                break;
+            case 'monthly':
+            default:
+                dateFormat = 'YYYY-MM';
+                timeRange = new Date();
+                timeRange.setMonth(timeRange.getMonth() - 6); // Last 6 months
+        }
 
         const salesTrend = await db('deals')
             .where({ status: 'completed' })
-            .where('created_at', '>=', sixMonthsAgo)
-            .select(db.raw("to_char(created_at, 'YYYY-MM') as month"))
+            .where('created_at', '>=', timeRange)
+            .select(db.raw(`to_char(created_at, '${dateFormat}') as period`))
             .sum('value as sales')
-            .groupBy('month')
-            .orderBy('month');
+            .groupBy('period')
+            .orderBy('period');
 
-        // Format customer status counts into an object
         const customerStatusCounts = {
             active: 0,
             potential: 0,
@@ -77,10 +97,51 @@ export class AnalyticsRepository {
             conversionRate: parseFloat(conversionRate.toFixed(2)) || 0,
             customersByStatus: customerStatusCounts,
             salesTrend: salesTrend.map(item => ({
-                month: item.month,
+                period: item.period,
                 sales: Number(item.sales) || 0,
             })),
         };
+    }
+
+    async getSalesTrend(period: 'daily' | 'weekly' | 'monthly' | 'yearly') {
+        let timeRange: Date;
+        let dateFormat: string;
+
+        switch (period) {
+            case 'daily':
+                dateFormat = 'YYYY-MM-DD';
+                timeRange = new Date();
+                timeRange.setDate(timeRange.getDate() - 30); // Last 30 days
+                break;
+            case 'weekly':
+                dateFormat = 'YYYY-WW';
+                timeRange = new Date();
+                timeRange.setMonth(timeRange.getMonth() - 6); // Last 6 months
+                break;
+            case 'yearly':
+                dateFormat = 'YYYY';
+                timeRange = new Date();
+                timeRange.setFullYear(timeRange.getFullYear() - 5); // Last 5 years
+                break;
+            case 'monthly':
+            default:
+                dateFormat = 'YYYY-MM';
+                timeRange = new Date();
+                timeRange.setMonth(timeRange.getMonth() - 6); // Last 6 months
+        }   
+        const salesTrend = await db('deals')
+            .where({ status: 'completed' })
+            .where('created_at', '>=', timeRange)
+            .select(db.raw(`to_char(created_at, '${dateFormat}') as period`))
+            .sum('value as sales')
+            .groupBy('period')
+            .orderBy('period');
+        return {
+            salesTrend: salesTrend.map(item => ({
+                period: item.period,
+                sales: Number(item.sales) || 0,
+            })),
+        }
     }
 
     async getSalesAnalytics(query: QuerySalesDto) {
