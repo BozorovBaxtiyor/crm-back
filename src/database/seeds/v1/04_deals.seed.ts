@@ -17,9 +17,8 @@ export async function seed(knex: Knex): Promise<void> {
 
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setMonth(startDate.getMonth() - 3); // Going back 3 months
+    startDate.setMonth(startDate.getMonth() - 6);
 
-    // Helper function to get a random customer and its associated user
     const getRandomCustomer = () => {
         return customers[Math.floor(Math.random() * customers.length)];
     };
@@ -83,18 +82,18 @@ export async function seed(knex: Knex): Promise<void> {
         return descriptions[Math.floor(Math.random() * descriptions.length)];
     };
 
-    const dealsArray = Array.from({ length: 100 }, () => {
+    const dealsArray = Array.from({ length: 200 }, () => {
         const createdAt = getRandomDate(startDate, endDate);
         return {
             title: getRandomTitle(),
             description: getRandomDescription(),
-            value: parseFloat((Math.random() * 50000 + 5000).toFixed(2)), // Random value between 5000 and 55000
+            value: parseFloat((Math.random() * 50000 + 5000).toFixed(2)),
             status: getRandomStatus(),
             customer_id: getRandomCustomer().id,
             created_at: createdAt,
-            updated_at: createdAt
-        }; 
+            updated_at: createdAt,
+        };
     });
-    
+
     await knex('deals').insert(dealsArray);
 }

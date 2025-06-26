@@ -87,7 +87,7 @@ export async function seed(knex: Knex): Promise<void> {
             phone: getRandomPhone(),
             status: statuses[Math.floor(Math.random() * statuses.length)],
             value: values[Math.floor(Math.random() * values.length)],
-            company: company, // typo intentionally preserved from your code
+            company: company, 
             created_at,
             updated_at: created_at,
         };

@@ -5,7 +5,6 @@ import { QuerySalesDto } from './dto/query-sales.dto';
 @Injectable()
 export class AnalyticsRepository {
     async getDashboardStats(period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'monthly') {
-        console.log(period , 'period');
         
         const totalCustomersResult = await db('customers').count('id as count').first();
         const totalCustomers = totalCustomersResult?.count ?? 0;

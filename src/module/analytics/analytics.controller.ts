@@ -22,7 +22,6 @@ export class AnalyticsController {
     @ApiOperation({ summary: 'Get dashboard statistics' })
     async getDashboard(@Query('period') period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'daily') {
         const data = await this.analyticsService.getDashboardStats(period);
-        console.log(data);
         return { success: true, data };
     }
 
