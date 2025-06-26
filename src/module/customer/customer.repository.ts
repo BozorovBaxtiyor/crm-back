@@ -88,7 +88,6 @@ export class CustomerRepository {
                 company: data.company || null,
                 status: data.status || 'potential',
                 value: data.value || null,
-                user_id: 104,
             })
             .returning([
                 'id',
